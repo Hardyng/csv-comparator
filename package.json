@@ -1,0 +1,26 @@
+{
+  "name": "csv-comparator",
+  "version": "0.0.1",
+  "description": "Simple library comparing two CSV data sources and returning result",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -r esm 'test/**/*.spec.js' --watch --require @babel/register"
+  },
+  "author": "Adam Kalinowski",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/register": "^7.5.5",
+    "chai": "^4.2.0",
+    "eslint": "^6.1.0",
+    "eslint-config-google": "^0.13.0",
+    "mocha": "^6.2.0"
+  },
+  "dependencies": {
+    "csvtojson": "^2.0.10",
+    "lodash": "^4.17.15"
+  }
+}
