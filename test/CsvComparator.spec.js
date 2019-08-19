@@ -4,16 +4,6 @@ import CsvComparator from '../src/CsvComparator'
 describe('CsvComparator', () => {
   let comparator
 
-  const createExpected = (rowIndex, cellIndex, difference) => ({
-    differentRows: [
-      {
-        rowIndex,
-        cellIndex,
-        difference,
-      },
-    ],
-    success: true,
-  })
 
   beforeEach(() => {
     comparator = new CsvComparator()
@@ -29,7 +19,18 @@ describe('CsvComparator', () => {
     await comparator.compare('123', '456')
     await comparator.compare('!@#', '')
   })
-  describe('Properly Compares simple strings when', () => {
+  describe('Properly compares simple strings with one difference when it', () => {
+    const createExpected = (rowIndex, cellIndex, difference) => ({
+      differentRows: [
+        {
+          rowIndex,
+          cellIndex,
+          difference,
+        },
+      ],
+      success: true,
+    })
+
     it('has empty strings', async () => {
       const result = await comparator.compare('', '')
       const expected = {
@@ -52,6 +53,52 @@ describe('CsvComparator', () => {
     })
     it('has different number of columns', async () => {
       return expect(await comparator.compare('b,a', 'b')).to.be.eql(createExpected(0, 1, ['a', '']))
+    })
+  })
+  describe('Properly compares strings with more than one difference', () => {
+    it('has two different cells', async () => {
+      return expect(await comparator.compare('a,a', 'b,b')).to.be.eql({
+        differentRows: [
+          {
+            rowIndex: 0,
+            cellIndex: 0,
+            difference: ['a', 'b'],
+          },
+          {
+            rowIndex: 0,
+            cellIndex: 1,
+            difference: ['a', 'b'],
+          },
+        ],
+        success: true,
+      })
+    })
+    it('has two different rows', async () => {
+      return expect(await comparator.compare('a,a\na,a', 'b,b\nb,b')).to.be.eql({
+        differentRows: [
+          {
+            rowIndex: 0,
+            cellIndex: 0,
+            difference: ['a', 'b'],
+          },
+          {
+            rowIndex: 0,
+            cellIndex: 1,
+            difference: ['a', 'b'],
+          },
+          {
+            rowIndex: 1,
+            cellIndex: 0,
+            difference: ['a', 'b'],
+          },
+          {
+            rowIndex: 1,
+            cellIndex: 1,
+            difference: ['a', 'b'],
+          },
+        ],
+        success: true,
+      })
     })
   })
 })
