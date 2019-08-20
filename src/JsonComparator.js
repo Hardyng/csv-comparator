@@ -1,28 +1,46 @@
 import get from 'lodash/get'
 import uniq from 'lodash/uniq'
 
+/**
+ * Class which performs comparing between arrays of values
+ */
 class JsonComparator {
   /**
-   * @param {String[][][]} values
+   * Sets initial config later used for comparision
+   * @param options
    */
-  constructor (values) {
-    this._values = values
+  constructor (options = {
+    allowExtraRows: false,
+    allowExtraColumns: false,
+    allowEmptyCells: false,
+  }) {
+    this.allowExtraRows = options.allowExtraRows
+    this.allowExtraColumns = options.allowExtraColumns
+    this.allowEmptyCells = options.allowEmptyCells
+
+    this.compare = this.compare.bind(this)
+    this._cellValuesAreNotEqual = this._cellValuesAreNotEqual.bind(this)
+    this._getCellValues = this._getCellValues.bind(this)
+    this._getNumberOfRows = this._getNumberOfRows.bind(this)
+    this._getNumberOfColumns = this._getNumberOfColumns.bind(this)
   }
+
   /**
-   * @returns {Promise<{ rowIndex: Number, cellIndex: Number, difference: String[] }[]>}
+   * @param {String[][][]} values
+   * @returns {Promise<{ rowIndex: Number, columnIndex: Number, difference: String[] }[]>}
    */
-  async compare () {
+  async compare (values) {
     const differentRows = []
-    const maxNumberOfRows = this._getMaxNumberOfRows()
-    const numberOfColumns = (get(this._values, '0.0') || []).length
+    const maxNumberOfRows = this._getNumberOfRows(values)
+    const numberOfColumns = this._getNumberOfColumns(values)
 
     Array.from({length: maxNumberOfRows}).forEach((row, rowIndex) => {
-      Array.from({length: numberOfColumns}).forEach((cell, cellIndex) => {
-        const cellValues = this._getCellValues(rowIndex, cellIndex)
+      Array.from({length: numberOfColumns}).forEach((cell, columnIndex) => {
+        const cellValues = this._getCellValues(values, rowIndex, columnIndex)
         if (this._cellValuesAreNotEqual(cellValues)) {
           differentRows.push({
             rowIndex,
-            cellIndex,
+            columnIndex,
             difference: cellValues,
           })
         }
@@ -33,6 +51,9 @@ class JsonComparator {
   }
 
   _cellValuesAreNotEqual (cellValues) {
+    if (this.allowEmptyCells) {
+      cellValues = cellValues.filter(cell => cell)
+    }
     return uniq(cellValues).length !== 1
   }
 
@@ -42,13 +63,25 @@ class JsonComparator {
    * @returns {String[]}
    * @private
    */
-  _getCellValues (row, cell) {
+  _getCellValues (values, row, cell) {
     const parseSource = dataSource => get(dataSource, `${row}.${cell}`) || ''
-    return this._values.map(parseSource)
+    return values.map(parseSource)
   }
 
-  _getMaxNumberOfRows () {
-    return Math.max(...this._values.map(arr => arr.length))
+  _getNumberOfRows (values) {
+    if (this.allowExtraRows) {
+      return Math.min(...values.map(arr => arr.length))
+    } else {
+      return Math.max(...values.map(arr => arr.length))
+    }
+  }
+
+  _getNumberOfColumns (values) {
+    if (this.allowExtraColumns) {
+      return Math.min(...values.map(arr => (arr[0] || []).length))
+    } else {
+      return Math.max(...values.map(arr => (arr[0] || []).length))
+    }
   }
 }
 

@@ -1,11 +1,20 @@
-import {expect} from 'chai'
+import chai, {expect} from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 import CsvComparator from '../src/CsvComparator'
+import CsvTransformer from '../src/CsvTransformer'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
+import JsonComparator from '../src/JsonComparator'
+
+chai.use(sinonChai)
+chai.use(chaiAsPromised)
 
 describe('CsvComparator', () => {
   let comparator
 
 
   beforeEach(() => {
+    sinon.restore()
     comparator = new CsvComparator()
   })
 
@@ -15,90 +24,37 @@ describe('CsvComparator', () => {
   })
 
   it('Accepts two argument strings as data sources', async () => {
+    sinon.replace(comparator.csvTransformer, 'transform', sinon.fake())
+    sinon.replace(JsonComparator.prototype, 'compare', sinon.fake.resolves())
     await comparator.compare('', '')
     await comparator.compare('123', '456')
     await comparator.compare('!@#', '')
   })
-  describe('Properly compares simple strings with one difference when it', () => {
-    const createExpected = (rowIndex, cellIndex, difference) => ({
-      differentRows: [
-        {
-          rowIndex,
-          cellIndex,
-          difference,
-        },
-      ],
+  it('calls csv transformer and jsonComparator and resolves based on their outputs', async () => {
+    const csvTransformerFake = sinon.fake.resolves([['123'], ['1234']])
+    const jsonComparatorFake = sinon.fake.resolves(['321'])
+    sinon.replace(comparator.csvTransformer, 'transform', csvTransformerFake)
+    sinon.replace(JsonComparator.prototype, 'compare', jsonComparatorFake)
+    const result = await comparator.compare('1', '2')
+    expect(csvTransformerFake).to.have.been.calledWith(['1', '2'])
+    expect(jsonComparatorFake).to.have.been.calledWith([['123'], ['1234']])
+
+    expect(result).to.be.eql({
+      difference: ['321'],
       success: true,
     })
-
-    it('has empty strings', async () => {
-      const result = await comparator.compare('', '')
-      const expected = {
-        differentRows: [],
-        success: true,
-      }
-      return expect(result).to.be.eql(expected)
-    })
-    it('has one cell csv strings', async () => {
-      const localAssert = async (compareArgs) =>
-        expect(await comparator.compare(...compareArgs)).to.be.eql(createExpected(0, 0, compareArgs))
-
-      return Promise.all([
-        await localAssert(['b', 'a']),
-        await localAssert(['a', 'b']),
-      ])
-    })
-    it('has different number of rows', async () => {
-      return expect(await comparator.compare('b\na', 'b')).to.be.eql(createExpected(1, 0, ['a', '']))
-    })
-    it('has different number of columns', async () => {
-      return expect(await comparator.compare('b,a', 'b')).to.be.eql(createExpected(0, 1, ['a', '']))
-    })
   })
-  describe('Properly compares strings with more than one difference', () => {
-    it('has two different cells', async () => {
-      return expect(await comparator.compare('a,a', 'b,b')).to.be.eql({
-        differentRows: [
-          {
-            rowIndex: 0,
-            cellIndex: 0,
-            difference: ['a', 'b'],
-          },
-          {
-            rowIndex: 0,
-            cellIndex: 1,
-            difference: ['a', 'b'],
-          },
-        ],
-        success: true,
-      })
+  describe('Initialization options', () => {
+    it('accepts csvtojson options', (done) => {
+      expect(new CsvComparator().options.csvToJsonOptions).to.be.eql({}) // default
+      expect(new CsvComparator({csvToJsonOptions: {delimiter: ';'}}).options.csvToJsonOptions.delimiter).to.be.eql(';')
+      done()
     })
-    it('has two different rows', async () => {
-      return expect(await comparator.compare('a,a\na,a', 'b,b\nb,b')).to.be.eql({
-        differentRows: [
-          {
-            rowIndex: 0,
-            cellIndex: 0,
-            difference: ['a', 'b'],
-          },
-          {
-            rowIndex: 0,
-            cellIndex: 1,
-            difference: ['a', 'b'],
-          },
-          {
-            rowIndex: 1,
-            cellIndex: 0,
-            difference: ['a', 'b'],
-          },
-          {
-            rowIndex: 1,
-            cellIndex: 1,
-            difference: ['a', 'b'],
-          },
-        ],
-        success: true,
-      })
+    it('accepts differences options', (done) => {
+      expect(new CsvComparator({allowExtraRows: true}).options.allowExtraRows).to.be.eql(true) // default
+      expect(new CsvComparator({allowExtraColumns: true}).options.allowExtraColumns).to.be.eql(true) // default
+      expect(new CsvComparator({allowEmptyCells: true}).options.allowEmptyCells).to.be.eql(true) // default
+      done()
     })
   })
 })
