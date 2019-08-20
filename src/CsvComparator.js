@@ -8,6 +8,7 @@ export default class CsvComparator {
    * allowExtraRows: Boolean,
    * allowExtraColumns: Boolean,
    * allowEmptyCells: Boolean
+   * cellsEqualityFn: Function
    * }} options
    */
   constructor (options) {
@@ -16,6 +17,7 @@ export default class CsvComparator {
       allowExtraRows: false,
       allowExtraColumns: false,
       allowEmptyCells: true,
+      cellsEqualityFn: null,
     }, options)
 
     this.csvTransformer = new CsvTransformer(this.options.csvToJsonOptions)
@@ -44,11 +46,9 @@ export default class CsvComparator {
       allowExtraRows: this.options.allowExtraRows,
       allowExtraColumns: this.options.allowExtraColumns,
       allowEmptyCells: this.options.allowEmptyCells,
+      cellsEqualityFn: this.options.cellsEqualityFn,
     }).compare(sourceArrays)
 
-    return {
-      difference,
-      success: true,
-    }
+    return difference
   }
 }

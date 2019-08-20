@@ -10,13 +10,15 @@ class JsonComparator {
     allowExtraRows: false,
     allowExtraColumns: false,
     allowEmptyCells: false,
+    cellsEqualityFn: null,
   }) {
     this.allowExtraRows = options.allowExtraRows
     this.allowExtraColumns = options.allowExtraColumns
     this.allowEmptyCells = options.allowEmptyCells
+    this.cellsEqualityFn = options.cellsEqualityFn
 
     this.compare = this.compare.bind(this)
-    this._cellValuesAreNotEqual = this._cellValuesAreNotEqual.bind(this)
+    this._cellValuesAreEqual = this._cellValuesAreEqual.bind(this)
     this._getCellValues = this._getCellValues.bind(this)
     this._getNumberOfRows = this._getNumberOfRows.bind(this)
     this._getNumberOfColumns = this._getNumberOfColumns.bind(this)
@@ -34,7 +36,7 @@ class JsonComparator {
     Array.from({length: maxNumberOfRows}).forEach((row, rowIndex) => {
       Array.from({length: numberOfColumns}).forEach((cell, columnIndex) => {
         const cellValues = this._getCellValues(values, rowIndex, columnIndex)
-        if (this._cellValuesAreNotEqual(cellValues)) {
+        if (!this._cellValuesAreEqual(cellValues)) {
           differentRows.push({
             rowIndex,
             columnIndex,
@@ -47,11 +49,14 @@ class JsonComparator {
     return differentRows
   }
 
-  _cellValuesAreNotEqual (cellValues) {
+  _cellValuesAreEqual (cellValues) {
+    if (this.cellsEqualityFn) {
+      return this.cellsEqualityFn(cellValues)
+    }
     if (this.allowEmptyCells) {
       cellValues = cellValues.filter(cell => cell)
     }
-    return new Set(cellValues).size !== 1
+    return new Set(cellValues).size <= 1
   }
 
   /**

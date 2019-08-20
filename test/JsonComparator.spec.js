@@ -140,9 +140,39 @@ describe('JsonComparator', () => {
       comparator = new JsonComparator({
         allowEmptyCells: true,
       })
-      const dataSource1 = [['1', '', '3']] // 1 column
-      const dataSource2 = [['1', '2', '3']] // 3 rows
+      const dataSource1 = [['1', '', '3']]
+      const dataSource2 = [['1', '2', '3']]
       return expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([])
+    })
+    it('Returns empty array when allowEmptyCells option is true and sources are empty strings', async () => {
+      comparator = new JsonComparator({
+        allowEmptyCells: true,
+      })
+      const dataSource1 = [['', '', '']]
+      const dataSource2 = [['', '', '']]
+      return expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([])
+    })
+    describe('Custom cells equality function - cellsEqualityFn', () => {
+      it('Returns empty array if cellsEqualityFn always returns true', async () => {
+        comparator = new JsonComparator({
+          cellsEqualityFn: () => true,
+        })
+        const dataSource1 = [['1', '2', '3']]
+        const dataSource2 = [['4', '5', '6']]
+        expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([])
+      })
+      it('Returns every cell as difference if cellsEqualityFn always returns false', async () => {
+        comparator = new JsonComparator({
+          cellsEqualityFn: () => false,
+        })
+        const dataSource1 = [['1']]
+        const dataSource2 = [['1']]
+        expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([{
+          columnIndex: 0,
+          rowIndex: 0,
+          difference: ['1', '1'],
+        }])
+      })
     })
   })
 })

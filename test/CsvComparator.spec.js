@@ -37,10 +37,7 @@ describe('CsvComparator', () => {
     expect(csvTransformerFake).to.have.been.calledWith(['1', '2'])
     expect(jsonComparatorFake).to.have.been.calledWith([['123'], ['1234']])
 
-    expect(result).to.be.eql({
-      difference: ['321'],
-      success: true,
-    })
+    expect(result).to.be.eql(['321'])
   })
   describe('Initialization options', () => {
     it('accepts csvtojson options', (done) => {
@@ -52,6 +49,8 @@ describe('CsvComparator', () => {
       expect(new CsvComparator({allowExtraRows: true}).options.allowExtraRows).to.be.eql(true) // default
       expect(new CsvComparator({allowExtraColumns: true}).options.allowExtraColumns).to.be.eql(true) // default
       expect(new CsvComparator({allowEmptyCells: true}).options.allowEmptyCells).to.be.eql(true) // default
+      const cellsEqualityFn = () => {}
+      expect(new CsvComparator({cellsEqualityFn}).options.cellsEqualityFn).to.be.eql(cellsEqualityFn) // default
       done()
     })
   })
