@@ -4,6 +4,7 @@
   "description": "Simple library comparing two CSV data sources and returning result",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint test/** src/** --fix",
     "test": "mocha 'test/**/*.spec.js' --watch --require @babel/register"
   },
   "author": "Adam Kalinowski",

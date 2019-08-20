@@ -10,12 +10,16 @@ describe('CsvTransformer', () => {
   })
   describe('transformSingle()', () => {
     it('transforms csv string into arrays', async () => {
+      async function localAssert (dataSource, expected) {
+        return expect(await new CsvTransformer().transformSingle(dataSource)).to.be.eql(expected)
+      }
+
       return Promise.all([
-        expect(await new CsvTransformer().transformSingle('a, a')).to.be.eql([['a', 'a']]),
-        expect(await new CsvTransformer().transformSingle('a, b, c, d')).to.be.eql([['a', 'b', 'c', 'd']]),
-        expect(await new CsvTransformer().transformSingle('a, b, c, d\ne, f, g, h')).to.be.eql([['a', 'b', 'c', 'd'], ['e', 'f', 'g', 'h']]),
-        expect(await new CsvTransformer().transformSingle('a\nb, c, d, e')).to.be.eql([['a'], ['b', 'c', 'd', 'e']]),
-        expect(await new CsvTransformer().transformSingle('a, b, c\nd')).to.be.eql([['a', 'b', 'c'], ['d']]),
+        localAssert('a, a', [['a', 'a']]),
+        localAssert('a, b, c, d', [['a', 'b', 'c', 'd']]),
+        localAssert('a, b, c, d\ne, f, g, h', [['a', 'b', 'c', 'd'], ['e', 'f', 'g', 'h']]),
+        localAssert('a\nb, c, d, e', [['a'], ['b', 'c', 'd', 'e']]),
+        localAssert('a, b, c\nd', [['a', 'b', 'c'], ['d']]),
       ])
     })
     it('transforms buffers into arrays', async () => {
@@ -32,6 +36,7 @@ describe('CsvTransformer', () => {
       async function localAssert (delimiter, dataSource, expectedResult) {
         return expect(await new CsvTransformer({delimiter}).transformSingle(dataSource)).to.be.eql(expectedResult)
       }
+
       return Promise.all([
         localAssert(';', 'a;a', [['a', 'a']]),
         localAssert('e', 'aea', [['a', 'a']]),

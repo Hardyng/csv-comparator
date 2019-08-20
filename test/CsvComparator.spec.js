@@ -1,7 +1,6 @@
 import chai, {expect} from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import CsvComparator from '../src/CsvComparator'
-import CsvTransformer from '../src/CsvTransformer'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import JsonComparator from '../src/JsonComparator'
@@ -11,7 +10,6 @@ chai.use(chaiAsPromised)
 
 describe('CsvComparator', () => {
   let comparator
-
 
   beforeEach(() => {
     sinon.restore()

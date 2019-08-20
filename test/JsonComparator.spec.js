@@ -7,7 +7,6 @@ chai.use(chaiAsPromised)
 describe('JsonComparator', () => {
   let comparator
 
-
   beforeEach(() => {
     comparator = new JsonComparator()
   })
@@ -120,7 +119,7 @@ describe('JsonComparator', () => {
       const dataSource2 = [['1', '2', '3']] // 3 rows
       return expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([])
     })
-    it('Returns array with difference if allowExtraColumns is false and only difference exists on extra columns', async () => {
+    it('Returns array with difference when difference exists on extra columns', async () => {
       comparator = new JsonComparator({
         allowExtraColumns: false,
       })
@@ -137,7 +136,7 @@ describe('JsonComparator', () => {
         },
       ])
     })
-    it('Returns empty array if allowEmpty is true and only differences are between empty string and not empty string', async () => {
+    it('Returns empty array when allowEmptyCells option is true', async () => {
       comparator = new JsonComparator({
         allowEmptyCells: true,
       })
