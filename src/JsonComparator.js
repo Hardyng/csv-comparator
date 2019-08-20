@@ -1,6 +1,3 @@
-import get from 'lodash/get'
-import uniq from 'lodash/uniq'
-
 /**
  * Class which performs comparing between arrays of values
  */
@@ -54,20 +51,26 @@ class JsonComparator {
     if (this.allowEmptyCells) {
       cellValues = cellValues.filter(cell => cell)
     }
-    return uniq(cellValues).length !== 1
+    return new Set(cellValues).size !== 1
   }
 
   /**
+   * @param {String[][][]} values
    * @param {Number} row
    * @param {Number} cell
    * @returns {String[]}
    * @private
    */
   _getCellValues (values, row, cell) {
-    const parseSource = dataSource => get(dataSource, `${row}.${cell}`) || ''
-    return values.map(parseSource)
+    const getValueFromDataSource = dataSource => ((dataSource[row] || [])[cell]) || ''
+    return values.map(getValueFromDataSource)
   }
 
+  /**
+   * @param {String[][][]} values
+   * @returns {Number}
+   * @private
+   */
   _getNumberOfRows (values) {
     if (this.allowExtraRows) {
       return Math.min(...values.map(arr => arr.length))
@@ -76,6 +79,11 @@ class JsonComparator {
     }
   }
 
+  /**
+   * @param {String[][][]} values
+   * @returns {Number}
+   * @private
+   */
   _getNumberOfColumns (values) {
     if (this.allowExtraColumns) {
       return Math.min(...values.map(arr => (arr[0] || []).length))
