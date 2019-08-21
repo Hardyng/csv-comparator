@@ -1,14 +1,27 @@
 {
   "name": "csv-comparator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simple library comparing two CSV data sources and returning result",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Hardyng/csv-comparator.git"
+  },
+  "keywords": [
+    "csv",
+    "comparision",
+    "comparator"
+  ],
   "scripts": {
+    "build": "babel src --out-dir dist",
     "lint": "eslint test/** src/** --fix",
     "test": "mocha 'test/**/*.spec.js' --watch --require @babel/register"
   },
   "author": "Adam Kalinowski",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hardyng/csv-comparator/issues"
+  },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
