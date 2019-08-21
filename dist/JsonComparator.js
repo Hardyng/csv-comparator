@@ -67,6 +67,10 @@ class JsonComparator {
       return this.cellsEqualityFn(cellValues);
     }
 
+    if (cellValues.length === 1) {
+      return false;
+    }
+
     if (this.allowEmptyCells) {
       cellValues = cellValues.filter(cell => cell);
     }

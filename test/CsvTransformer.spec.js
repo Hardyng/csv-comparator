@@ -11,25 +11,16 @@ describe('CsvTransformer', () => {
   describe('transformSingle()', () => {
     it('transforms csv string into arrays', async () => {
       async function localAssert (dataSource, expected) {
+        console.log(await new CsvTransformer().transformSingle(dataSource))
         return expect(await new CsvTransformer().transformSingle(dataSource)).to.be.eql(expected)
       }
 
       return Promise.all([
-        localAssert('a, a', [['a', 'a']]),
-        localAssert('a, b, c, d', [['a', 'b', 'c', 'd']]),
-        localAssert('a, b, c, d\ne, f, g, h', [['a', 'b', 'c', 'd'], ['e', 'f', 'g', 'h']]),
-        localAssert('a\nb, c, d, e', [['a'], ['b', 'c', 'd', 'e']]),
-        localAssert('a, b, c\nd', [['a', 'b', 'c'], ['d']]),
-      ])
-    })
-    it('transforms buffers into arrays', async () => {
-      const emptyFile = fs.readFileSync(path.join(__dirname, './mocks/empty.csv'))
-      const singleLetterFile = fs.readFileSync(path.join(__dirname, './mocks/singleLetter.csv'))
-      const manyRowsFile = fs.readFileSync(path.join(__dirname, './mocks/manyRows.csv'))
-      return Promise.all([
-        expect(await new CsvTransformer().transformSingle(emptyFile)).to.be.eql([]),
-        expect(await new CsvTransformer().transformSingle(singleLetterFile)).to.be.eql([['a']]),
-        expect(await new CsvTransformer().transformSingle(manyRowsFile)).to.be.eql([['a', 'b', 'c'], ['d', 'e', 'f']]),
+        localAssert('a,a', [['a', 'a']]),
+        localAssert('a,b,c,d', [['a', 'b', 'c', 'd']]),
+        localAssert('a,b,c,d\ne,f,g,h', [['a', 'b', 'c', 'd'], ['e', 'f', 'g', 'h']]),
+        localAssert('a\nb,c,d,e', [['a'], ['b', 'c', 'd', 'e']]),
+        localAssert('a,b,c\nd', [['a', 'b', 'c'], ['d']]),
       ])
     })
     it('parses different separators', async () => {
@@ -40,7 +31,7 @@ describe('CsvTransformer', () => {
       return Promise.all([
         localAssert(';', 'a;a', [['a', 'a']]),
         localAssert('e', 'aea', [['a', 'a']]),
-        localAssert(['.', ','], 'a.b.c.d', [['a', 'b', 'c', 'd']]),
+        localAssert('.', 'a.b.c.d', [['a', 'b', 'c', 'd']]),
       ])
     })
   })

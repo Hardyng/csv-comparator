@@ -1,15 +1,14 @@
-const csv = require('csvtojson')
-
+const Papa = require('papaparse')
 /**
  * Normalizes raw data into format later used in JsonComparator
  */
 class CsvTransformer {
-  constructor (csvToJsonOptions = {delimiter: ','}) {
-    this.options = Object.assign({
-      noheader: true,
-      output: 'csv',
-      delimiter: ',',
-    }, csvToJsonOptions)
+  constructor ({header = false, skipEmptyLines = false, delimiter = ''} = {}) {
+    this.options = {
+      header,
+      delimiter,
+      skipEmptyLines,
+    }
 
     this.transform = this.transform.bind(this)
     this.transformSingle = this.transformSingle.bind(this)
@@ -19,12 +18,13 @@ class CsvTransformer {
     return Promise.all(dataSources.map(this.transformSingle))
   }
 
-  transformSingle (dataSource) {
-    if (typeof dataSource === 'string' || dataSource.constructor.name === 'Buffer') {
-      return csv(this.options).fromString(dataSource.toString())
-    } else {
-      throw Error('Unrecognized argument type')
-    }
+  async transformSingle (dataSource) {
+    return new Promise(resolve => Papa.parse(dataSource, {
+      ...this.options,
+      complete (results) {
+        return resolve(results.data)
+      },
+    }))
   }
 }
 

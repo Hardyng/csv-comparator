@@ -91,6 +91,15 @@ describe('JsonComparator', () => {
       ])
     })
   })
+  it('returns difference if only one element exists', async () => {
+    return expect(await comparator.compare([[['a']], [[]]])).to.be.eql([
+      {
+        rowIndex: 0,
+        columnIndex: 0,
+        difference: ['a', ''],
+      },
+    ])
+  })
   it('Assigns configuration options', (done) => {
     comparator = new JsonComparator({
       allowExtraRows: true,
