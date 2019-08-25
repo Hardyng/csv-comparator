@@ -28,17 +28,6 @@ describe('CsvComparator', () => {
     await comparator.compare('123', '456')
     await comparator.compare('!@#', '')
   })
-  it('calls csv transformer and jsonComparator and resolves based on their outputs', async () => {
-    const csvTransformerFake = sinon.fake.resolves([['123'], ['1234']])
-    const jsonComparatorFake = sinon.fake.resolves(['321'])
-    sinon.replace(comparator.csvTransformer, 'transform', csvTransformerFake)
-    sinon.replace(JsonComparator.prototype, 'compare', jsonComparatorFake)
-    const result = await comparator.compare('1', '2')
-    expect(csvTransformerFake).to.have.been.calledWith(['1', '2'])
-    expect(jsonComparatorFake).to.have.been.calledWith([['123'], ['1234']])
-
-    expect(result).to.be.eql(['321'])
-  })
   describe('Initialization options', () => {
     it('accepts csvtojson options', (done) => {
       expect(new CsvComparator().options.csvToJsonOptions).to.be.eql({}) // default

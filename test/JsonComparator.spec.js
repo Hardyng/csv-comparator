@@ -5,21 +5,17 @@ import JsonComparator from '../src/JsonComparator'
 chai.use(chaiAsPromised)
 
 describe('JsonComparator', () => {
-  let comparator
-
-  beforeEach(() => {
-    comparator = new JsonComparator()
-  })
-
   it('creates an instance of JsonComparator class', (done) => {
+    const comparator = new JsonComparator()
     expect(comparator.constructor.name).to.be.eql('JsonComparator')
     done()
   })
 
-  it('Accepts two argument strings as data sources', async () => {
-    await comparator.compare([[[]], [[]]])
-    await comparator.compare([[['123']], [['456']]])
-    await comparator.compare([[['!@#']], [['']]])
+  it('Accepts two argument strings as data sources', (done) => {
+    new JsonComparator([[[]], [[]]]).compare().asList.difference
+    new JsonComparator([[['123']], [['456']]]).compare().asList.difference
+    new JsonComparator([[['!@#']], [['']]]).compare().asList.difference
+    done()
   })
   describe('Comparision between simple strings with zero or one difference', () => {
     const createExpected = (rowIndex, columnIndex, difference) => ([
@@ -30,30 +26,32 @@ describe('JsonComparator', () => {
       },
     ])
 
-    it('returns no difference between empty strings', async () => {
-      return expect(await comparator.compare([[['']], [['']]])).to.be.eql([])
+    it('returns no difference between empty strings', (done) => {
+      expect(new JsonComparator([[['']], [['']]]).compare().asList.difference).to.be.eql([])
+      done()
     })
-    it('returns proper difference between csv strings with one row and one cell', async () => {
-      const localAssert = async (compareArgs, expected) =>
-        expect(await comparator.compare(compareArgs)).to.be.eql(createExpected(0, 0, expected))
+    it('returns proper difference between csv strings with one row and one cell', (done) => {
+      const localAssert = (compareArgs, expected) =>
+        expect(new JsonComparator(compareArgs).compare().asList.difference).to.be.eql(createExpected(0, 0, expected))
 
-      return Promise.all([
-        await localAssert([[['b']], [['a']]], ['b', 'a']),
-        await localAssert([[['a']], [['b']]], ['a', 'b']),
-      ])
+      localAssert([[['b']], [['a']]], ['b', 'a'])
+      localAssert([[['a']], [['b']]], ['a', 'b'])
+      done()
     })
-    it('returns proper difference between csv string with two rows and string with one row', async () => {
-      return expect(await comparator.compare([[['a'], ['b']], [['a']]])).to.be.eql(createExpected(1, 0, ['b', '']))
+    it('returns proper difference between csv string with two rows and string with one row', (done) => {
+      expect(new JsonComparator([[['a'], ['b']], [['a']]]).compare().asList.difference).to.be.eql(createExpected(1, 0, ['b', null]))
+      done()
     })
-    it('returns proper difference between csv string with two columns and string with one column', async () => {
+    it('returns proper difference between csv string with two columns and string with one column', (done) => {
       const dataSource1 = [['b', 'a']]
       const dataSource2 = [['b']]
-      return expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql(createExpected(0, 1, ['a', '']))
+      expect(new JsonComparator([dataSource1, dataSource2]).compare().asList.difference).to.be.eql(createExpected(0, 1, ['a', null]))
+      done()
     })
   })
   describe('Comparision between simple strings with two or more differences', () => {
-    it('returns two differences when comparing strings with two different columns', async () => {
-      return expect(await comparator.compare([[['a', 'a']], [['b', 'b']]])).to.be.eql([
+    it('returns two differences when comparing strings with two different columns', (done) => {
+      expect(new JsonComparator([[['a', 'a']], [['b', 'b']]]).compare().asList.difference).to.be.eql([
         {
           rowIndex: 0,
           columnIndex: 0,
@@ -65,9 +63,10 @@ describe('JsonComparator', () => {
           difference: ['a', 'b'],
         },
       ])
+      done()
     })
-    it('returns two differences when comparing strings with two different rows', async () => {
-      return expect(await comparator.compare([[['a', 'a'], ['a', 'a']], [['b', 'b'], ['b', 'b']]])).to.be.eql([
+    it('returns two differences when comparing strings with two different rows', (done) => {
+      expect(new JsonComparator([[['a', 'a'], ['a', 'a']], [['b', 'b'], ['b', 'b']]]).compare().asList.difference).to.be.eql([
         {
           rowIndex: 0,
           columnIndex: 0,
@@ -89,19 +88,21 @@ describe('JsonComparator', () => {
           difference: ['a', 'b'],
         },
       ])
+      done()
     })
   })
-  it('returns difference if only one element exists', async () => {
-    return expect(await comparator.compare([[['a']], [[]]])).to.be.eql([
+  it('returns difference if only one element exists', (done) => {
+    expect(new JsonComparator([[['a']], [[]]]).compare().asList.difference).to.be.eql([
       {
         rowIndex: 0,
         columnIndex: 0,
-        difference: ['a', ''],
+        difference: ['a', null],
       },
     ])
+    done()
   })
   it('Assigns configuration options', (done) => {
-    comparator = new JsonComparator({
+    const comparator = new JsonComparator(null, {
       allowExtraRows: true,
       allowExtraColumns: true,
       allowEmptyCells: true,
@@ -112,75 +113,128 @@ describe('JsonComparator', () => {
     done()
   })
   describe('Compares entities based on configuration options', () => {
-    it('Returns empty array if allowExtraRows is true and only difference exists on extra rows', async () => {
-      comparator = new JsonComparator({
-        allowExtraRows: true,
-      })
+    it('Returns empty array if allowExtraRows is true and only difference exists on extra rows', (done) => {
       const dataSource1 = [['1']] // 1 row
       const dataSource2 = [['1'], ['2'], ['3']] // 3 rows
-      return expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([])
-    })
-    it('Returns empty array if allowExtraColumns is true and only difference exists on extra columns', async () => {
-      comparator = new JsonComparator({
-        allowExtraColumns: true,
+
+      const comparator = new JsonComparator([dataSource1, dataSource2], {
+        allowExtraRows: true,
       })
+      expect(comparator.compare().asList.difference).to.be.eql([])
+      done()
+    })
+    it('Returns empty array if allowExtraColumns is true and only difference exists on extra columns', (done) => {
       const dataSource1 = [['1']] // 1 column
       const dataSource2 = [['1', '2', '3']] // 3 rows
-      return expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([])
-    })
-    it('Returns array with difference when difference exists on extra columns', async () => {
-      comparator = new JsonComparator({
-        allowExtraColumns: false,
+
+      const comparator = new JsonComparator([dataSource1, dataSource2], {
+        allowExtraColumns: true,
       })
+      expect(comparator.compare().asList.difference).to.be.eql([])
+      done()
+    })
+    it('Returns array with difference when difference exists on extra columns', (done) => {
       const dataSource1 = [['1']] // 1 column
       const dataSource2 = [['1', '2']] // 3 rows
-      return expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([
+
+      const comparator = new JsonComparator([dataSource1, dataSource2], {
+        allowExtraColumns: false,
+      })
+      expect(comparator.compare().asList.difference).to.be.eql([
         {
           columnIndex: 1,
           rowIndex: 0,
           difference: [
-            '',
+            null,
             '2',
           ],
         },
       ])
+      done()
     })
-    it('Returns empty array when allowEmptyCells option is true', async () => {
-      comparator = new JsonComparator({
-        allowEmptyCells: true,
-      })
-      const dataSource1 = [['1', '', '3']]
+    it('Returns empty array when allowEmptyCells option is true', (done) => {
+      const dataSource1 = [['1', null, '3']]
       const dataSource2 = [['1', '2', '3']]
-      return expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([])
-    })
-    it('Returns empty array when allowEmptyCells option is true and sources are empty strings', async () => {
-      comparator = new JsonComparator({
+      const comparator = new JsonComparator([dataSource1, dataSource2], {
         allowEmptyCells: true,
       })
+      expect(comparator.compare().asList.difference).to.be.eql([])
+      done()
+    })
+    it('Returns empty array when allowEmptyCells option is true and sources are empty strings', (done) => {
       const dataSource1 = [['', '', '']]
       const dataSource2 = [['', '', '']]
-      return expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([])
+      const comparator = new JsonComparator([dataSource1, dataSource2], {
+        allowEmptyCells: true,
+      })
+
+      expect(comparator.compare().asList.difference).to.be.eql([])
+      done()
     })
     describe('Custom cells equality function - cellsEqualityFn', () => {
-      it('Returns empty array if cellsEqualityFn always returns true', async () => {
-        comparator = new JsonComparator({
-          cellsEqualityFn: () => true,
-        })
+      it('Returns empty array if cellsEqualityFn always returns true', (done) => {
         const dataSource1 = [['1', '2', '3']]
         const dataSource2 = [['4', '5', '6']]
-        expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([])
-      })
-      it('Returns every cell as difference if cellsEqualityFn always returns false', async () => {
-        comparator = new JsonComparator({
-          cellsEqualityFn: () => false,
+        const comparator = new JsonComparator([dataSource1, dataSource2], {
+          cellsEqualityFn: () => true,
         })
+
+        expect(comparator.compare().asList.difference).to.be.eql([])
+        done()
+      })
+      it('Returns every cell as difference if cellsEqualityFn always returns false', (done) => {
         const dataSource1 = [['1']]
         const dataSource2 = [['1']]
-        expect(await comparator.compare([dataSource1, dataSource2])).to.be.eql([{
+        const comparator = new JsonComparator([dataSource1, dataSource2], {
+          cellsEqualityFn: () => false,
+        })
+
+        expect(comparator.compare().asList.difference).to.be.eql([{
           columnIndex: 0,
           rowIndex: 0,
           difference: ['1', '1'],
         }])
+        done()
+      })
+    })
+
+    describe('get asTable()', () => {
+      it('Returns formatted initial array if there is no difference', (done) => {
+        expect(new JsonComparator([[[]], [[]]]).compare().asTable.table).to.be.eql([[]])
+        expect(new JsonComparator([[[3]], [[3]]]).compare().asTable.table).to.be.eql([[{
+          value: 3,
+          isDifferent: false,
+          difference: null,
+        }]])
+        done()
+      })
+      it('Returns formatted initial array with pointed out differences', (done) => {
+        expect(new JsonComparator([[[2]], [[3]]]).compare().asTable.table).to.be.eql([[{
+          value: 2,
+          isDifferent: true,
+          difference: [2, 3],
+        }]])
+        expect(new JsonComparator([[[2, 5]], [[3]]]).compare().asTable.table).to.be.eql([[
+          {
+            value: 2,
+            isDifferent: true,
+            difference: [2, 3],
+          },
+          {
+            value: 5,
+            isDifferent: true,
+            difference: [5, null],
+          },
+        ]])
+        done()
+      })
+      it('Returns difference on extra rows', (done) => {
+        expect(new JsonComparator([[[1]], [[1], [2]]]).compare().asTable.table[1][0]).to.be.eql({
+          value: null,
+          isDifferent: true,
+          difference: [null, 2],
+        })
+        done()
       })
     })
   })

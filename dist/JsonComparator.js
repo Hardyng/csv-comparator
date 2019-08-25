@@ -10,10 +10,11 @@ exports.default = void 0;
  */
 class JsonComparator {
   /**
+   * @param {String[][][]} source
    * Sets initial config later used for comparision
    * @param options
    */
-  constructor(options = {
+  constructor(source = [], options = {
     allowExtraRows: false,
     allowExtraColumns: false,
     allowEmptyCells: false,
@@ -23,24 +24,64 @@ class JsonComparator {
     this.allowExtraColumns = options.allowExtraColumns;
     this.allowEmptyCells = options.allowEmptyCells;
     this.cellsEqualityFn = options.cellsEqualityFn;
+    this.source = source;
+    this.result = null;
+    this.tableResult = source ? this._createTable(source[0]) : source;
     this.compare = this.compare.bind(this);
     this._cellValuesAreEqual = this._cellValuesAreEqual.bind(this);
     this._getCellValues = this._getCellValues.bind(this);
     this._getNumberOfRows = this._getNumberOfRows.bind(this);
     this._getNumberOfColumns = this._getNumberOfColumns.bind(this);
   }
+
+  _createTable() {
+    const maxNumberOfRows = this._getNumberOfRows();
+
+    const numberOfColumns = this._getNumberOfColumns();
+
+    const arr = [];
+    Array.from({
+      length: maxNumberOfRows
+    }).forEach((row, rowIndex) => {
+      arr.push([]);
+      Array.from({
+        length: numberOfColumns
+      }).forEach((cell, columnIndex) => {
+        const value = (this.source[0][rowIndex] || [])[columnIndex] || null;
+        arr[rowIndex].push({
+          value,
+          isDifferent: false,
+          difference: null
+        });
+      });
+    });
+    return arr;
+  }
+
+  get asList() {
+    return {
+      sources: this.source,
+      difference: this.result
+    };
+  }
+
+  get asTable() {
+    return {
+      sources: this.source,
+      table: this.tableResult
+    };
+  }
   /**
-   * @param {String[][][]} values
    * @returns {Promise<{ rowIndex: Number, columnIndex: Number, difference: String[] }[]>}
    */
 
 
-  async compare(values) {
+  compare() {
     const differentRows = [];
 
-    const maxNumberOfRows = this._getNumberOfRows(values);
+    const maxNumberOfRows = this._getNumberOfRows();
 
-    const numberOfColumns = this._getNumberOfColumns(values);
+    const numberOfColumns = this._getNumberOfColumns();
 
     Array.from({
       length: maxNumberOfRows
@@ -48,9 +89,14 @@ class JsonComparator {
       Array.from({
         length: numberOfColumns
       }).forEach((cell, columnIndex) => {
-        const cellValues = this._getCellValues(values, rowIndex, columnIndex);
+        const cellValues = this._getCellValues(rowIndex, columnIndex);
 
         if (!this._cellValuesAreEqual(cellValues)) {
+          if (this.tableResult[rowIndex] && this.tableResult[rowIndex][columnIndex]) {
+            this.tableResult[rowIndex][columnIndex].difference = cellValues;
+            this.tableResult[rowIndex][columnIndex].isDifferent = true;
+          }
+
           differentRows.push({
             rowIndex,
             columnIndex,
@@ -59,7 +105,8 @@ class JsonComparator {
         }
       });
     });
-    return differentRows;
+    this.result = differentRows;
+    return this;
   }
 
   _cellValuesAreEqual(cellValues) {
@@ -78,7 +125,6 @@ class JsonComparator {
     return new Set(cellValues).size <= 1;
   }
   /**
-   * @param {String[][][]} values
    * @param {Number} row
    * @param {Number} cell
    * @returns {String[]}
@@ -86,37 +132,35 @@ class JsonComparator {
    */
 
 
-  _getCellValues(values, row, cell) {
-    const getValueFromDataSource = dataSource => (dataSource[row] || [])[cell] || '';
+  _getCellValues(row, cell) {
+    const getValueFromDataSource = dataSource => (dataSource[row] || [])[cell] || null;
 
-    return values.map(getValueFromDataSource);
+    return this.source.map(getValueFromDataSource);
   }
   /**
-   * @param {String[][][]} values
    * @returns {Number}
    * @private
    */
 
 
-  _getNumberOfRows(values) {
+  _getNumberOfRows() {
     if (this.allowExtraRows) {
-      return Math.min(...values.map(arr => arr.length));
+      return Math.min(...this.source.map(arr => arr.length));
     } else {
-      return Math.max(...values.map(arr => arr.length));
+      return Math.max(...this.source.map(arr => arr.length));
     }
   }
   /**
-   * @param {String[][][]} values
    * @returns {Number}
    * @private
    */
 
 
-  _getNumberOfColumns(values) {
+  _getNumberOfColumns() {
     if (this.allowExtraColumns) {
-      return Math.min(...values.map(arr => (arr[0] || []).length));
+      return Math.min(...this.source.map(arr => (arr[0] || []).length));
     } else {
-      return Math.max(...values.map(arr => (arr[0] || []).length));
+      return Math.max(...this.source.map(arr => (arr[0] || []).length));
     }
   }
 

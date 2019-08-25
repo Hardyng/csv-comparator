@@ -42,13 +42,11 @@ export default class CsvComparator {
       throw Error('Must provide arguments')
     }
     const sourceArrays = await this.csvTransformer.transform(dataSources)
-    const difference = await new JsonComparator({
+    return await new JsonComparator(sourceArrays, {
       allowExtraRows: this.options.allowExtraRows,
       allowExtraColumns: this.options.allowExtraColumns,
       allowEmptyCells: this.options.allowEmptyCells,
       cellsEqualityFn: this.options.cellsEqualityFn,
-    }).compare(sourceArrays)
-
-    return difference
+    }).compare()
   }
 }
