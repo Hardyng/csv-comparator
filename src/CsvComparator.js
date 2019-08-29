@@ -16,7 +16,7 @@ export default class CsvComparator {
       csvToJsonOptions: {},
       allowExtraRows: false,
       allowExtraColumns: false,
-      allowEmptyCells: true,
+      allowEmptyCells: false,
       cellsEqualityFn: null,
     }, options)
 
