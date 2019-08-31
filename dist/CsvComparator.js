@@ -37,7 +37,7 @@ class CsvComparator {
    * sources
    * @example
    * const comparator = new CsvComparator();
-   * comparator.compare('1,2,3,5', '1,2,3,4').then(result => {
+   * comparator.compareSources('1,2,3,5', '1,2,3,4').then(result => {
    *   console.log(result.success) // => true
    *   console.log(result.difference) // => [{ rowIndex: 0, columnIndex: 3, difference: ['5', '4'] }]
    * })
