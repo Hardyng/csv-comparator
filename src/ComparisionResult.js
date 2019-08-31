@@ -1,0 +1,53 @@
+/**
+ * @typedef ComparisionRow
+ * @property {ComparisionRowStatus} status
+ * @property {Object[]} values
+ */
+import ComparisionRowStatus from './helpers/ComparisionRowStatus'
+import _ from 'lodash'
+
+export default class ComparisionResult {
+  /**
+   * @param {ComparisionRow[]} rows
+   */
+  constructor (rows) {
+    this._rows = rows
+  }
+
+  getAll () {
+    return this._rows
+  }
+
+  getRemoved () {
+    return this._filterStatus(ComparisionRowStatus.REMOVED)
+  }
+
+  getAdded () {
+    return this._filterStatus(ComparisionRowStatus.ADDED)
+  }
+
+  getChanged () {
+    return this._filterStatus(ComparisionRowStatus.CHANGED)
+  }
+
+  getIdle () {
+    return this._filterStatus(ComparisionRowStatus.IDLE)
+  }
+
+  getDifferenceList () {
+    return _.chain(this._rows)
+        .filter(row => row.status !== ComparisionRowStatus.IDLE)
+        .map(row => row.values.filter(cell => cell.changed).map(cell => ({
+          difference: [cell.value, cell.newValue],
+          row: row.values.map(cell => cell.value),
+        })))
+        .flatten()
+        .value()
+  }
+
+  _filterStatus (status) {
+    return _.chain(this._rows)
+        .filter(row => row.status === status)
+        .value()
+  }
+}
