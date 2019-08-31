@@ -1,6 +1,6 @@
 {
   "name": "csv-comparator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Simple library comparing two CSV data sources and returning result",
   "main": "dist/index.js",
   "repository": {
@@ -30,7 +30,7 @@
     "@babel/register": "^7.5.5",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^6.1.0",
+    "eslint": "^6.3.0",
     "eslint-config-google": "^0.13.0",
     "mocha": "^6.2.0",
     "path": "^0.12.7",
