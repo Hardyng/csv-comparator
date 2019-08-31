@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import ComparisionRowStatus from './helpers/ComparisionRowStatus'
 
 export default class DataSourceHashMap {
   constructor (values, options) {
@@ -29,7 +30,7 @@ export default class DataSourceHashMap {
 
   static compare (row1, row2) {
     const status = {
-      status: 'IDLE',
+      status: ComparisionRowStatus.IDLE,
       values: [],
     }
     row1.forEach((cell, index) => {
@@ -40,7 +41,7 @@ export default class DataSourceHashMap {
           newValue: undefined,
         })
       } else {
-        status.status = 'CHANGED'
+        status.status = ComparisionRowStatus.CHANGED
         status.values.push({
           value: cell,
           changed: true,
