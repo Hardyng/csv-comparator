@@ -1,4 +1,4 @@
-import compareResult from './ComparisionResult'
+import ComparisionResult from './ComparisionResult'
 import DataSourceHashMap from './DataSourceHashMap'
 import ComparisionRowStatus from './helpers/ComparisionRowStatus'
 
@@ -42,5 +42,5 @@ export default function compareSources (source1, source2, options = {
     tableResult.splice(positionIndex + 1, 0, status)
   })
 
-  return compareResult(tableResult)
+  return new ComparisionResult(tableResult, source1, source2, options)
 }

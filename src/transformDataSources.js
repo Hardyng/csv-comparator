@@ -10,7 +10,7 @@ export default function transformDataSources (...dataSources) {
 async function _transformSingle (dataSource) {
   return new Promise(resolve => {
     if (Array.isArray(dataSource)) {
-      return dataSource
+      return resolve(dataSource)
     } else {
       Papa.parse(dataSource, {
         complete (results) {

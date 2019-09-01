@@ -10,8 +10,11 @@ export default class ComparisionResult {
   /**
    * @param {ComparisionRow[]} rows
    */
-  constructor (rows) {
+  constructor (rows, originalData, comparisionData, options) {
     this._rows = rows
+    this.originalData = originalData
+    this.comparisionData = comparisionData
+    this.options = options
   }
 
   getAll () {
@@ -46,8 +49,13 @@ export default class ComparisionResult {
   }
 
   _filterStatus (status) {
-    return _.chain(this._rows)
-        .filter(row => row.status === status)
-        .value()
+    return {
+      value: _.chain(this._rows)
+          .filter(row => row.status === status)
+          .value(),
+      originalData: this.originalData,
+      comparisionData: this.comparisionData,
+      options: this.options,
+    }
   }
 }

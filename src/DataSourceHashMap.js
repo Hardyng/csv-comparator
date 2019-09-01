@@ -14,7 +14,7 @@ export default class DataSourceHashMap {
   }
 
   getIndex (row, rowIndex) {
-    if (this._options.indexColumns) {
+    if (this._options.indexColumns && this._options.indexColumns.length) {
       return this._options.indexColumns.map(col => row[col]).join('-')
     } else {
       return rowIndex
@@ -53,7 +53,7 @@ export default class DataSourceHashMap {
   }
 
   _createHashMap (values, {indexColumns}) {
-    if (indexColumns) {
+    if (indexColumns && indexColumns.length) {
       return _.keyBy(values, obj => indexColumns.map(col => obj[col]).join('-'))
     } else {
       return values
