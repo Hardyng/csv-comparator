@@ -38,7 +38,7 @@ export default class DataSourceHashMap {
         status.values.push({
           value: cell,
           changed: false,
-          newValue: undefined,
+          newValue: cell,
         })
       } else {
         status.status = ComparisionRowStatus.CHANGED

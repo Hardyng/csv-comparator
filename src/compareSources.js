@@ -4,12 +4,13 @@ import ComparisionRowStatus from './helpers/ComparisionRowStatus'
 
 export default function compareSources (source1, source2, options = {
   indexColumns: null,
+  trackColumns: null,
+  firstRowIsHeader: false,
 }) {
   const tableResult = []
   const hashMap = new DataSourceHashMap(source1, options)
   const comparisionHashMap = new DataSourceHashMap(source2, options)
   // insert edited
-
   hashMap.asArray.forEach(({index, value}) => {
     const comparisionRow = comparisionHashMap.getRow(index)
     // handle removed
@@ -34,9 +35,9 @@ export default function compareSources (source1, source2, options = {
     const status = {
       status: ComparisionRowStatus.ADDED,
       values: value.map(cell => ({
-        value: null,
+        value: cell,
         changed: true,
-        newValue: cell,
+        oldValue: cell,
       })),
     }
     tableResult.splice(positionIndex + 1, 0, status)

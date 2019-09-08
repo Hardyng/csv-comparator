@@ -18,7 +18,12 @@ export default class ComparisionResult {
   }
 
   getAll () {
-    return this._rows
+    return {
+      value: this._rows,
+      originalData: this.originalData,
+      comparisionData: this.comparisionData,
+      options: this.options
+    };
   }
 
   getRemoved () {
