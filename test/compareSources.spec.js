@@ -16,10 +16,7 @@ describe('compareSources', () => {
       const fake = sinon.fake()
       sinon.replace(compareResultModule, 'default', fake)
       compareSources([[]], [[]])
-      expect(fake).to.have.been.calledWith([{
-        status: 'IDLE',
-        values: [],
-      }])
+      expect(fake).to.have.been.calledWith([])
       done()
     })
     it('compares two arrays with single string "A"', (done) => {
@@ -32,7 +29,7 @@ describe('compareSources', () => {
           {
             value: 'A',
             changed: false,
-            newValue: undefined,
+            newValue: 'A',
           },
         ],
       }])
@@ -65,7 +62,7 @@ describe('compareSources', () => {
             {
               value: 'A',
               changed: false,
-              newValue: undefined,
+              newValue: 'A',
             },
           ],
         },
@@ -75,7 +72,7 @@ describe('compareSources', () => {
             {
               value: 'B',
               changed: false,
-              newValue: undefined,
+              newValue: 'B',
             },
           ],
         },
@@ -85,7 +82,7 @@ describe('compareSources', () => {
             {
               value: 'C',
               changed: false,
-              newValue: undefined,
+              newValue: 'C',
             },
           ],
         },
@@ -116,9 +113,9 @@ describe('compareSources', () => {
         status: 'ADDED',
         values: [
           {
-            value: null,
+            value: 'A',
             changed: true,
-            newValue: 'A',
+            oldValue: 'A',
           },
         ],
       }])
@@ -135,7 +132,7 @@ describe('compareSources', () => {
             {
               value: 'A',
               changed: false,
-              newValue: undefined,
+              newValue: 'A',
             },
           ],
         },
@@ -155,7 +152,7 @@ describe('compareSources', () => {
             {
               value: 'C',
               changed: false,
-              newValue: undefined,
+              newValue: 'C',
             },
           ],
         },
@@ -163,9 +160,9 @@ describe('compareSources', () => {
           status: 'ADDED',
           values: [
             {
-              value: null,
+              value: 'E',
               changed: true,
-              newValue: 'E',
+              oldValue: 'E',
             },
           ],
         },
@@ -183,7 +180,7 @@ describe('compareSources', () => {
             {
               value: 'A',
               changed: false,
-              newValue: undefined,
+              newValue: 'A',
             },
           ],
         },
@@ -213,7 +210,7 @@ describe('compareSources', () => {
         values: [{
           changed: false,
           value: 'A',
-          newValue: undefined,
+          newValue: 'A',
         }],
       }])
       done()
@@ -231,12 +228,12 @@ describe('compareSources', () => {
             {
               changed: false,
               value: 'A',
-              newValue: undefined,
+              newValue: 'A',
             },
             {
               changed: false,
               value: 'B',
-              newValue: undefined,
+              newValue: 'B',
             },
           ],
         },
@@ -246,12 +243,12 @@ describe('compareSources', () => {
             {
               changed: false,
               value: 'B',
-              newValue: undefined,
+              newValue: 'B',
             },
             {
               changed: false,
               value: 'A',
-              newValue: undefined,
+              newValue: 'A',
             },
           ],
         },
@@ -271,7 +268,7 @@ describe('compareSources', () => {
             {
               changed: false,
               value: 'A',
-              newValue: undefined,
+              newValue: 'A',
             },
           ],
         },
@@ -291,7 +288,7 @@ describe('compareSources', () => {
             {
               changed: false,
               value: 'C',
-              newValue: undefined,
+              newValue: 'C',
             },
           ],
         },
@@ -300,8 +297,8 @@ describe('compareSources', () => {
           values: [
             {
               changed: true,
-              value: null,
-              newValue: 'D',
+              value: 'D',
+              oldValue: 'D',
             },
           ],
         },
@@ -321,12 +318,12 @@ describe('compareSources', () => {
             {
               changed: false,
               value: 'A',
-              newValue: undefined,
+              newValue: 'A',
             },
             {
               changed: false,
               value: 'payload-A',
-              newValue: undefined,
+              newValue: 'payload-A',
             },
           ],
         },
@@ -336,7 +333,7 @@ describe('compareSources', () => {
             {
               changed: false,
               value: 'B',
-              newValue: undefined,
+              newValue: 'B',
             },
             {
               changed: true,

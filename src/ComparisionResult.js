@@ -4,7 +4,7 @@
  * @property {Object[]} values
  */
 import ComparisionRowStatus from './helpers/ComparisionRowStatus'
-import _ from 'lodash'
+import flatten from 'lodash/flatten'
 
 export default class ComparisionResult {
   /**
@@ -22,8 +22,8 @@ export default class ComparisionResult {
       value: this._rows,
       originalData: this.originalData,
       comparisionData: this.comparisionData,
-      options: this.options
-    };
+      options: this.options,
+    }
   }
 
   getRemoved () {
@@ -43,21 +43,17 @@ export default class ComparisionResult {
   }
 
   getDifferenceList () {
-    return _.chain(this._rows)
+    return flatten(this._rows
         .filter(row => row.status !== ComparisionRowStatus.IDLE)
         .map(row => row.values.filter(cell => cell.changed).map(cell => ({
           difference: [cell.value, cell.newValue],
           row: row.values.map(cell => cell.value),
-        })))
-        .flatten()
-        .value()
+        }))))
   }
 
   _filterStatus (status) {
     return {
-      value: _.chain(this._rows)
-          .filter(row => row.status === status)
-          .value(),
+      value: this._rows.filter(row => row.status === status),
       originalData: this.originalData,
       comparisionData: this.comparisionData,
       options: this.options,

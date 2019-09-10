@@ -1,6 +1,7 @@
 import ComparisionResult from './ComparisionResult'
 import DataSourceHashMap from './DataSourceHashMap'
 import ComparisionRowStatus from './helpers/ComparisionRowStatus'
+import fill from 'lodash/fill'
 
 export default function compareSources (source1, source2, options = {
   indexColumns: null,
@@ -8,8 +9,16 @@ export default function compareSources (source1, source2, options = {
   firstRowIsHeader: false,
 }) {
   const tableResult = []
-  const hashMap = new DataSourceHashMap(source1, options)
-  const comparisionHashMap = new DataSourceHashMap(source2, options)
+  // Find how many columns there are
+  const maxCols1 = Math.max(...source1.map(arr => arr.length))
+  const maxCols2 = Math.max(...source2.map(arr => arr.length))
+  const maxCols = Math.max(maxCols1, maxCols2)
+  // Fill array with empty values to adjust to added columns
+  source1 = source1.map(arr => [...arr, ...fill(Array(maxCols - arr.length), '')])
+  source2 = source2.map(arr => [...arr, ...fill(Array(maxCols - arr.length), '')])
+
+  const hashMap = new DataSourceHashMap(source1.slice(options.firstRowIsHeader ? 1 : 0), options)
+  const comparisionHashMap = new DataSourceHashMap(source2.slice(options.firstRowIsHeader ? 1 : 0), options)
   // insert edited
   hashMap.asArray.forEach(({index, value}) => {
     const comparisionRow = comparisionHashMap.getRow(index)

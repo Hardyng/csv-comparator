@@ -4,7 +4,6 @@ import ComparisionResult from '../src/ComparisionResult'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import ComparisionRowStatus from '../src/helpers/ComparisionRowStatus'
-import _ from 'lodash'
 chai.use(chaiAsPromised)
 chai.use(sinonChai)
 
@@ -124,7 +123,7 @@ describe('ComparisionResult', () => {
   describe('getRemoved', () => {
     it('filters empty array', (done) => {
       const removed = new ComparisionResult([]).getRemoved()
-      expect(removed).to.be.eql([])
+      expect(removed.value).to.be.eql([])
       done()
     })
     it('filters all wrong statuses', (done) => {
@@ -144,7 +143,7 @@ describe('ComparisionResult', () => {
       ]
 
       const removed = new ComparisionResult(rows).getRemoved()
-      expect(removed).to.be.eql([
+      expect(removed.value).to.be.eql([
         {
           status: ComparisionRowStatus.REMOVED,
         },

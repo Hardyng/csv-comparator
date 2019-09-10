@@ -7,7 +7,7 @@ exports.default = void 0;
 
 var _ComparisionRowStatus = _interopRequireDefault(require("./helpers/ComparisionRowStatus"));
 
-var _lodash = _interopRequireDefault(require("lodash"));
+var _flatten = _interopRequireDefault(require("lodash/flatten"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -28,7 +28,12 @@ class ComparisionResult {
   }
 
   getAll() {
-    return this._rows;
+    return {
+      value: this._rows,
+      originalData: this.originalData,
+      comparisionData: this.comparisionData,
+      options: this.options
+    };
   }
 
   getRemoved() {
@@ -48,15 +53,15 @@ class ComparisionResult {
   }
 
   getDifferenceList() {
-    return _lodash.default.chain(this._rows).filter(row => row.status !== _ComparisionRowStatus.default.IDLE).map(row => row.values.filter(cell => cell.changed).map(cell => ({
+    return (0, _flatten.default)(this._rows.filter(row => row.status !== _ComparisionRowStatus.default.IDLE).map(row => row.values.filter(cell => cell.changed).map(cell => ({
       difference: [cell.value, cell.newValue],
       row: row.values.map(cell => cell.value)
-    }))).flatten().value();
+    }))));
   }
 
   _filterStatus(status) {
     return {
-      value: _lodash.default.chain(this._rows).filter(row => row.status === status).value(),
+      value: this._rows.filter(row => row.status === status),
       originalData: this.originalData,
       comparisionData: this.comparisionData,
       options: this.options

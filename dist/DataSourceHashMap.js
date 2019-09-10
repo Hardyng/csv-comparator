@@ -5,7 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _lodash = _interopRequireDefault(require("lodash"));
+var _toPairs = _interopRequireDefault(require("lodash/toPairs"));
+
+var _keyBy = _interopRequireDefault(require("lodash/keyBy"));
 
 var _ComparisionRowStatus = _interopRequireDefault(require("./helpers/ComparisionRowStatus"));
 
@@ -34,7 +36,7 @@ class DataSourceHashMap {
   }
 
   get asArray() {
-    return _lodash.default.toPairs(this._hashMap).map((pair, positionIndex) => ({
+    return (0, _toPairs.default)(this._hashMap).map((pair, positionIndex) => ({
       positionIndex,
       index: pair[0],
       value: pair[1]
@@ -46,17 +48,20 @@ class DataSourceHashMap {
       status: _ComparisionRowStatus.default.IDLE,
       values: []
     };
-    row1.forEach((cell, index) => {
-      if (cell === row2[index]) {
+    const maxCols = Math.max(row1.length, row2.length);
+    Array.from({
+      length: maxCols
+    }).forEach((_, index) => {
+      if (row1[index] === row2[index]) {
         status.values.push({
-          value: cell,
+          value: row1[index],
           changed: false,
-          newValue: undefined
+          newValue: row1[index]
         });
       } else {
         status.status = _ComparisionRowStatus.default.CHANGED;
         status.values.push({
-          value: cell,
+          value: row1[index],
           changed: true,
           newValue: row2[index]
         });
@@ -69,9 +74,9 @@ class DataSourceHashMap {
     indexColumns
   }) {
     if (indexColumns && indexColumns.length) {
-      return _lodash.default.keyBy(values, obj => indexColumns.map(col => obj[col]).join('-'));
+      return (0, _keyBy.default)(values.filter(row => row.some(val => val)), obj => indexColumns.map(col => obj[col]).join('-'));
     } else {
-      return values;
+      return values.filter(row => row.some(val => val));
     }
   }
 

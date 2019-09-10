@@ -11,14 +11,25 @@ var _DataSourceHashMap = _interopRequireDefault(require("./DataSourceHashMap"));
 
 var _ComparisionRowStatus = _interopRequireDefault(require("./helpers/ComparisionRowStatus"));
 
+var _fill = _interopRequireDefault(require("lodash/fill"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function compareSources(source1, source2, options = {
-  indexColumns: null
+  indexColumns: null,
+  trackColumns: null,
+  firstRowIsHeader: false
 }) {
-  const tableResult = [];
-  const hashMap = new _DataSourceHashMap.default(source1, options);
-  const comparisionHashMap = new _DataSourceHashMap.default(source2, options); // insert edited
+  const tableResult = []; // Find how many columns there are
+
+  const maxCols1 = Math.max(...source1.map(arr => arr.length));
+  const maxCols2 = Math.max(...source2.map(arr => arr.length));
+  const maxCols = Math.max(maxCols1, maxCols2); // Fill array with empty values to adjust to added columns
+
+  source1 = source1.map(arr => [...arr, ...(0, _fill.default)(Array(maxCols - arr.length), '')]);
+  source2 = source2.map(arr => [...arr, ...(0, _fill.default)(Array(maxCols - arr.length), '')]);
+  const hashMap = new _DataSourceHashMap.default(source1.slice(options.firstRowIsHeader ? 1 : 0), options);
+  const comparisionHashMap = new _DataSourceHashMap.default(source2.slice(options.firstRowIsHeader ? 1 : 0), options); // insert edited
 
   hashMap.asArray.forEach(({
     index,
@@ -53,9 +64,9 @@ function compareSources(source1, source2, options = {
     const status = {
       status: _ComparisionRowStatus.default.ADDED,
       values: value.map(cell => ({
-        value: null,
+        value: cell,
         changed: true,
-        newValue: cell
+        oldValue: cell
       }))
     };
     tableResult.splice(positionIndex + 1, 0, status);

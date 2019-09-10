@@ -1,4 +1,5 @@
-import _ from 'lodash'
+import toPairs from 'lodash/toPairs'
+import keyBy from 'lodash/keyBy'
 import ComparisionRowStatus from './helpers/ComparisionRowStatus'
 
 export default class DataSourceHashMap {
@@ -21,7 +22,7 @@ export default class DataSourceHashMap {
     }
   }
   get asArray () {
-    return _.toPairs(this._hashMap).map((pair, positionIndex) => ({
+    return toPairs(this._hashMap).map((pair, positionIndex) => ({
       positionIndex,
       index: pair[0],
       value: pair[1],
@@ -33,17 +34,18 @@ export default class DataSourceHashMap {
       status: ComparisionRowStatus.IDLE,
       values: [],
     }
-    row1.forEach((cell, index) => {
-      if (cell === row2[index]) {
+    const maxCols = Math.max(row1.length, row2.length)
+    Array.from({length: maxCols}).forEach((_, index) => {
+      if (row1[index] === row2[index]) {
         status.values.push({
-          value: cell,
+          value: row1[index],
           changed: false,
-          newValue: cell,
+          newValue: row1[index],
         })
       } else {
         status.status = ComparisionRowStatus.CHANGED
         status.values.push({
-          value: cell,
+          value: row1[index],
           changed: true,
           newValue: row2[index],
         })
@@ -54,9 +56,9 @@ export default class DataSourceHashMap {
 
   _createHashMap (values, {indexColumns}) {
     if (indexColumns && indexColumns.length) {
-      return _.keyBy(values, obj => indexColumns.map(col => obj[col]).join('-'))
+      return keyBy(values.filter(row => row.some(val => val)), obj => indexColumns.map(col => obj[col]).join('-'))
     } else {
-      return values
+      return values.filter(row => row.some(val => val))
     }
   }
 }

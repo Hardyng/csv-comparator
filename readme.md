@@ -1,22 +1,24 @@
 # csv-comparator
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![version](https://img.shields.io/badge/version-0.0.1-yellow.svg)](https://semver.org)
+[![version](https://img.shields.io/badge/version-0.1.0-yellow.svg)](https://semver.org)
 
-Compares csv files and string in browser. While library is under development I recommend [papaparse](https://www.papaparse.com/), [csvtojson](https://www.npmjs.com/package/csvtojson) or [csv-parse](https://www.npmjs.com/package/csv-parse)
-
-## Installation
-```sh
-$ npm install csv-comparator
-```
+Compares csv files and string in browser. Also check out:
+- [papaparse](https://www.papaparse.com/),
+- [csvtojson](https://www.npmjs.com/package/csvtojson)
+- [csv-parse](https://www.npmjs.com/package/csv-parse)
 
 ## Usage
 
 ```js
-import CsvComparator from 'csv-comparator'
+import compare from 'csv-comparator'
 
-const comparator = new CsvComparator()
-
-comparator.compare(file1, file2).then(result => {
-  console.log(result) // => [{ cellIndex: 0, rowIndex: 0, differences: ['value1', 'value2'] }]
+const result = compare(file, otherFile, {
+    indexColumns
+}).then(comparision => {
+  const allData = comparision.getAll()
+  console.log(allData.value) // => [{ status: 'CHANGED', values: [{changed: true, oldValue: '3', newValue: '2'}] }]
+  console.log(allData.originalData) // first file
+  console.log(allData.comparisionData) // second file
+  console.log(allData.options) // { indexColumns }
 })
 ```
